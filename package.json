@@ -1,0 +1,42 @@
+{
+  "name": "@traceproof/openclaw-traceproof-runtime",
+  "version": "0.2.0",
+  "description": "TraceProof core verification runtime for OpenClaw: one trace per session, verified IN/OUT message proofs, bundled grounding, and public TraceProof skill.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "files": [
+    "index.js",
+    "openclaw.plugin.json",
+    "README.md",
+    "bootstrap",
+    "skills",
+    "openclaw.config.template.json",
+    "RELEASE-NOTES.md",
+    "PUBLISHING.md"
+  ],
+  "openclaw": {
+    "extensions": [
+      "./index.js"
+    ],
+    "compat": {
+      "pluginApi": ">=2026.4.2",
+      "minGatewayVersion": "2026.4.2"
+    },
+    "build": {
+      "openclawVersion": "2026.4.2",
+      "pluginSdkVersion": "2026.4.2"
+    }
+  },
+  "homepage": "https://traceproof.org",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fzurro/traceproof-openclaw.git"
+  },
+  "keywords": [
+    "traceproof",
+    "openclaw",
+    "verification",
+    "provenance",
+    "message-proofs"
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "id": "traceproof-runtime",
+  "name": "TraceProof Runtime",
+  "description": "Creates one TraceProof conversation trace per OpenClaw session, injects TraceProof grounding automatically, and issues verified inbound/outbound message proofs.",
+  "version": "0.2.0",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "apiBaseUrl": {
+        "type": "string",
+        "description": "Base URL for the TraceProof API.",
+        "default": "https://api.traceproof.org"
+      },
+      "agentId": {
+        "type": "string",
+        "description": "TraceProof agent id used to create traces and message proofs."
+      },
+      "credentialKey": {
+        "type": "string",
+        "description": "TraceProof credential key used to authenticate trace and proof creation."
+      },
+      "channel": {
+        "type": "string",
+        "description": "TraceProof channel value sent on conversation trace creation.",
+        "default": "chat"
+      },
+      "sourceSystem": {
+        "type": "string",
+        "description": "Source system label recorded on trace creation.",
+        "default": "openclaw"
+      },
+      "originLabel": {
+        "type": "string",
+        "description": "Origin label recorded on trace creation.",
+        "default": "openclaw-chat"
+      },
+      "qrFormat": {
+        "type": "string",
+        "description": "Preferred QR format to store in session state.",
+        "enum": [
+          "svg",
+          "png"
+        ],
+        "default": "svg"
+      },
+      "verifyProofs": {
+        "type": "boolean",
+        "description": "If true, verifies each issued message proof immediately after issue.",
+        "default": true
+      },
+      "debug": {
+        "type": "boolean",
+        "description": "Enable extra plugin logging.",
+        "default": false
+      }
+    },
+    "required": [
+      "agentId",
+      "credentialKey"
+    ]
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "version": 5,
+  "sessions": {
+    "agent:main:telegram:direct:6925278541": {
+      "traceId": "29c631c66cd9c18b65bd5c2a8f025230",
+      "publicReference": "NXX94AQA",
+      "verifyUrl": "https://app.traceproof.org/verify/ref/NXX94AQA",
+      "qrCodeUrl": "https://api.traceproof.org/v1/traces/NXX94AQA/qr",
+      "channelId": "telegram",
+      "channel": "chat",
+      "sourceSystem": "openclaw",
+      "createdAt": "2026-04-06T12:44:55.257Z",
+      "inSeq": 2,
+      "outSeq": 2,
+      "proofs": [
+        {
+          "direction": "IN",
+          "messageSeq": 1,
+          "digest": "6452f93ed6f2ab2e952e38b23342f7881833f4a5ff1b3fba7e4586abd2faa9b9",
+          "proof": "omp1_c07ee1e1fcb5573c5acedeb41220d678a3eafaf70453af3a9973fcd5622c0a40",
+          "verified": true,
+          "verifyStatus": "valid",
+          "trustStatus": null,
+          "at": "2026-04-06T12:44:56.337Z",
+          "preview": "tell me about traceproof",
+          "verifyRaw": {
+            "valid": true,
+            "reason": "valid",
+            "verifiedAt": "2026-04-06T12:44:56.280Z"
+          },
+          "messageId": "25"
+        },
+        {
+          "direction": "OUT",
+          "messageSeq": 1,
+          "digest": "2f17163a85618c74d71bc85184eb5de6dd3f688f10188aca97e86fae638472dc",
+          "proof": "omp1_e8503a981957298aa4e342b77d156c9a99e8fc86b5c878f76a03e8da23f55630",
+          "verified": true,
+          "verifyStatus": "valid",
+          "trustStatus": null,
+          "at": "2026-04-06T12:45:10.774Z",
+          "preview": "TraceProof is a verification platform designed for ensuring the authenticity of communications...",
+          "verifyRaw": {
+            "valid": true,
+            "reason": "valid",
+            "verifiedAt": "2026-04-06T12:45:10.719Z"
+          },
+          "messageId": "26"
+        },
+        {
+          "direction": "IN",
+          "messageSeq": 2,
+          "digest": "0cf053413eaec7d3665f6055767fac2ebaf98b0783814ad4317222438be207fb",
+          "proof": "omp1_c00f8055799aa93293aa7425115afb1f57987a57e530b25013d300d37f561c98",
+          "verified": true,
+          "verifyStatus": "valid",
+          "trustStatus": null,
+          "at": "2026-04-06T12:45:15.065Z",
+          "preview": "how much does it cost ?",
+          "verifyRaw": {
+            "valid": true,
+            "reason": "valid",
+            "verifiedAt": "2026-04-06T12:45:15.005Z"
+          },
+          "messageId": "27"
+        },
+        {
+          "direction": "OUT",
+          "messageSeq": 2,
+          "digest": "79152d8fcef86a109d7a399cc297069837b18b8e2a9c46f2d6ff1611cf424f4f",
+          "proof": "omp1_b8839a6cdf02fac233fdfa65199995d9c42a11e1da3339e2726ddcb938c1efb9",
+          "verified": true,
+          "verifyStatus": "valid",
+          "trustStatus": null,
+          "at": "2026-04-06T12:45:20.198Z",
+          "preview": "The cost of using TraceProof can vary based on specific features, the scale of usage...",
+          "verifyRaw": {
+            "valid": true,
+            "reason": "valid",
+            "verifiedAt": "2026-04-06T12:45:20.139Z"
+          },
+          "messageId": "28"
+        }
+      ],
+      "runtimeMeta": {
+        "lastInboundDigest": "0cf053413eaec7d3665f6055767fac2ebaf98b0783814ad4317222438be207fb",
+        "lastInboundAtMs": 1775479514586,
+        "lastOutboundDigest": "79152d8fcef86a109d7a399cc297069837b18b8e2a9c46f2d6ff1611cf424f4f",
+        "lastOutboundAtMs": 1775479519369,
+        "lastOutboundPreview": "The cost of using TraceProof can vary based on specific features, the scale of usage...",
+        "lastOutboundMessageId": "28"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "plugins": {
+    "entries": {
+      "traceproof-runtime": {
+        "enabled": true,
+        "config": {
+          "apiBaseUrl": "https://api.traceproof.org",
+          "agentId": "<YOUR_TRACEPROOF_AGENT_ID>",
+          "credentialKey": "<YOUR_TRACEPROOF_CREDENTIAL_KEY>",
+          "channel": "chat",
+          "sourceSystem": "openclaw",
+          "originLabel": "openclaw-chat",
+          "qrFormat": "svg",
+          "verifyProofs": true,
+          "debug": false
+        }
+      }
+    }
+  }
+}
