@@ -30,7 +30,7 @@
   "homepage": "https://traceproof.org",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fzurro/traceproof-openclaw.git"
+    "url": "git+https://github.com/fzurro/traceproof-openclaw.git"
   },
   "keywords": [
     "traceproof",
