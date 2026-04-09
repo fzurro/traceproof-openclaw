@@ -5,6 +5,12 @@
         "enabled": true,
         "config": {
           "apiBaseUrl": "https://api.traceproof.org",
+          "oauthTokenUrl": "https://auth.traceproof.org/oauth/token",
+          "oauthClientId": "<YOUR_TRACEPROOF_OAUTH_CLIENT_ID>",
+          "oauthClientSecret": "<YOUR_TRACEPROOF_OAUTH_CLIENT_SECRET>",
+          "oauthScope": "trace:create trace:qr proof:issue proof:verify",
+          "oauthResource": "https://api.traceproof.org",
+          "oauthClientAuthMethod": "client_secret_post",
           "agentId": "<YOUR_TRACEPROOF_AGENT_ID>",
           "credentialKey": "<YOUR_TRACEPROOF_CREDENTIAL_KEY>",
           "channel": "chat",

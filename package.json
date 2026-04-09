@@ -1,6 +1,6 @@
 {
   "name": "@traceproof/openclaw-traceproof-runtime",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "TraceProof core verification runtime for OpenClaw: one trace per session, verified IN/OUT message proofs, bundled grounding, and public TraceProof skill.",
   "type": "module",
   "license": "Apache-2.0",
@@ -10,7 +10,7 @@
     "README.md",
     "bootstrap",
     "skills",
-    "openclaw.config.template.json",
+    "samples",
     "RELEASE-NOTES.md",
     "PUBLISHING.md"
   ],

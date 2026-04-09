@@ -7,9 +7,9 @@ This package enables:
 - verified inbound message proofs
 - verified outbound message proofs
 
-Register a free developer account at **traceproof.org** to create an Agent and credential for testing.
+Register a free developer account at **traceproof.org** to create an OAuth client, Agent, and credential for testing.
 
-**Important:** this package enables TraceProof verification, but it does **not** automatically render proof state in the visible chat UI. Showing badges, verify links, QR codes, or proof summaries in a channel or app UI is the responsibility of the developer integrating OpenClaw.
+> Important: this package enables TraceProof verification, but it does **not** automatically render proof state in the visible chat UI. Showing badges, verify links, QR codes, or proof summaries in a channel or app UI is the responsibility of the developer integrating OpenClaw.
 
 ---
 
@@ -17,14 +17,13 @@ Register a free developer account at **traceproof.org** to create an Agent and c
 
 - Bundles the TraceProof runtime plugin for OpenClaw
 - Creates one TraceProof conversation trace on the first message in a session
+- Uses OAuth2 client credentials to authenticate TraceProof API calls
 - Issues and verifies inbound message proofs (`message:received`)
 - Issues and verifies outbound message proofs (`message:sent`)
 - Stores per-session state in the agent workspace for trace continuity and dedupe
 - Dedupes duplicate Telegram outbound events using `messageId`
 - Dedupes duplicate inbound events using digest + short time window
 - Includes bundled TraceProof grounding files for use in the OpenClaw workspace
-
----
 
 ## What this release does not do
 
@@ -33,9 +32,9 @@ Register a free developer account at **traceproof.org** to create an Agent and c
 - It does not replace channel-specific UX logic inside OpenClaw core
 - It does not automatically make the assistant knowledgeable about TraceProof unless the bundled workspace grounding is also copied into the active workspace
 
-This release is the stable **core build**.
+This release is the stable core build.
 
-Treat Telegram as the reference **proofing** channel, not the reference UX-banner implementation.
+Treat Telegram as the reference proofing channel, **not** the reference UX-banner implementation.
 
 ---
 
@@ -56,16 +55,17 @@ In practice, this means:
 - `openclaw.plugin.json` — manifest + config schema
 - `bootstrap/AGENTS.md` — workspace grounding file
 - `skills/traceproof/SKILL.md` — public TraceProof skill
-- `openclaw.config.template.json` — config template with placeholders
+- `samples/openclaw.config.template.json` — config template with placeholders
 - `RELEASE-NOTES.md` — release scope and limits
+- `PUBLISHING.md` — publish and release steps
 
 ---
 
 ## Installation
 
-Installation has **two parts**:
+Installation has two parts:
 
-1. install the runtime plugin  
+1. install the runtime plugin
 2. copy the bundled TraceProof grounding into the active OpenClaw workspace
 
 ### 1) Install the TraceProof runtime plugin
@@ -80,6 +80,7 @@ openclaw gateway restart
 
 This installs the core runtime that:
 - creates a TraceProof conversation trace
+- gets an OAuth2 bearer token for TraceProof API calls
 - issues and verifies inbound/outbound message proofs
 - stores per-session state in `<workspace>/.traceproof-runtime/sessions.json`
 
@@ -114,6 +115,7 @@ This step is recommended because:
 ## Configuration
 
 Create a free developer account at **traceproof.org**, then create:
+- a TraceProof OAuth client
 - a TraceProof Agent
 - a TraceProof credential
 
@@ -127,6 +129,12 @@ Add this block to `~/.openclaw/openclaw.json` and replace the placeholders:
         "enabled": true,
         "config": {
           "apiBaseUrl": "https://api.traceproof.org",
+          "oauthTokenUrl": "https://auth.traceproof.org/oauth/token",
+          "oauthClientId": "<YOUR_TRACEPROOF_OAUTH_CLIENT_ID>",
+          "oauthClientSecret": "<YOUR_TRACEPROOF_OAUTH_CLIENT_SECRET>",
+          "oauthScope": "trace:create trace:qr proof:issue proof:verify",
+          "oauthResource": "https://api.traceproof.org",
+          "oauthClientAuthMethod": "client_secret_post",
           "agentId": "<YOUR_TRACEPROOF_AGENT_ID>",
           "credentialKey": "<YOUR_TRACEPROOF_CREDENTIAL_KEY>",
           "channel": "chat",
@@ -141,6 +149,12 @@ Add this block to `~/.openclaw/openclaw.json` and replace the placeholders:
   }
 }
 ```
+
+Notes:
+- The TraceProof API endpoints and JSON payloads stay the same.
+- The runtime still sends `agentId` and `credentialKey` on trace and proof requests.
+- The runtime now first requests an OAuth2 access token, then sends `Authorization: Bearer <token>` on TraceProof API calls.
+- Tokens are cached in memory and refreshed shortly before expiry.
 
 ---
 
@@ -202,6 +216,7 @@ That accurately matches the stable behavior in this release.
 
 This package gives OpenClaw:
 - a TraceProof conversation trace
+- OAuth2-authenticated TraceProof API access
 - verified inbound proofs
 - verified outbound proofs
 - persistent per-session verification state

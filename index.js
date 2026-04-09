@@ -5,6 +5,10 @@ import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 
 const DEFAULTS = {
   apiBaseUrl: "https://api.traceproof.org",
+  oauthTokenUrl: "https://auth.traceproof.org/oauth/token",
+  oauthScope: "trace:create trace:qr proof:issue proof:verify",
+  oauthResource: "https://api.traceproof.org",
+  oauthClientAuthMethod: "client_secret_post",
   channel: "chat",
   sourceSystem: "openclaw",
   originLabel: "openclaw-chat",
@@ -17,12 +21,23 @@ function normalizeConfig(raw) {
   const cfg = raw ?? {};
   const agentId = String(cfg.agentId ?? "").trim();
   const credentialKey = String(cfg.credentialKey ?? "").trim();
-  if (!agentId || !credentialKey) return null;
+  const oauthClientId = String(cfg.oauthClientId ?? "").trim();
+  const oauthClientSecret = String(cfg.oauthClientSecret ?? "").trim();
+  if (!agentId || !credentialKey || !oauthClientId || !oauthClientSecret) return null;
 
   const qrFormat = String(cfg.qrFormat ?? DEFAULTS.qrFormat).toLowerCase() === "png" ? "png" : "svg";
+  const oauthClientAuthMethod = String(cfg.oauthClientAuthMethod ?? DEFAULTS.oauthClientAuthMethod).trim().toLowerCase() === "client_secret_basic"
+    ? "client_secret_basic"
+    : "client_secret_post";
 
   return {
     apiBaseUrl: String(cfg.apiBaseUrl ?? DEFAULTS.apiBaseUrl).replace(/\/$/, ""),
+    oauthTokenUrl: String(cfg.oauthTokenUrl ?? DEFAULTS.oauthTokenUrl).trim() || DEFAULTS.oauthTokenUrl,
+    oauthClientId,
+    oauthClientSecret,
+    oauthScope: String(cfg.oauthScope ?? DEFAULTS.oauthScope).trim() || DEFAULTS.oauthScope,
+    oauthResource: String(cfg.oauthResource ?? DEFAULTS.oauthResource).trim() || DEFAULTS.oauthResource,
+    oauthClientAuthMethod,
     agentId,
     credentialKey,
     channel: String(cfg.channel ?? DEFAULTS.channel).trim() || DEFAULTS.channel,
@@ -31,6 +46,12 @@ function normalizeConfig(raw) {
     qrFormat,
     verifyProofs: cfg.verifyProofs === false ? false : DEFAULTS.verifyProofs,
     debug: cfg.debug === true,
+    _oauthTokenCache: {
+      accessToken: "",
+      tokenType: "Bearer",
+      expiresAtMs: 0,
+      scope: "",
+    },
   };
 }
 
@@ -48,6 +69,83 @@ function contentToText(content) {
 function preview(value, max = 160) {
   const s = typeof value === "string" ? value : contentToText(value);
   return s ? s.slice(0, max) : "";
+}
+
+function toBase64(value) {
+  return Buffer.from(value, "utf8").toString("base64");
+}
+
+async function getOAuthAccessToken(config) {
+  const now = Date.now();
+  const cache = config._oauthTokenCache || {};
+  if (cache.accessToken && Number(cache.expiresAtMs || 0) - now > 60_000) {
+    return cache.accessToken;
+  }
+
+  const body = {
+    grant_type: "client_credentials",
+    scope: config.oauthScope,
+    resource: config.oauthResource,
+  };
+
+  const headers = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  };
+
+  if (config.oauthClientAuthMethod === "client_secret_basic") {
+    headers.Authorization = `Basic ${toBase64(`${config.oauthClientId}:${config.oauthClientSecret}`)}`;
+  } else {
+    body.client_id = config.oauthClientId;
+    body.client_secret = config.oauthClientSecret;
+  }
+
+  const res = await fetch(config.oauthTokenUrl, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+  });
+
+  const bodyText = await res.text().catch(() => "");
+  let data = {};
+  try {
+    data = bodyText ? JSON.parse(bodyText) : {};
+  } catch {
+  }
+
+  if (!res.ok) {
+    throw new Error(`TraceProof OAuth token request failed (${res.status}): ${bodyText || res.statusText}`);
+  }
+
+  const accessToken = String(data?.access_token ?? "").trim();
+  const tokenType = String(data?.token_type ?? "Bearer").trim() || "Bearer";
+  const expiresIn = Number(data?.expires_in ?? 900);
+  if (!accessToken) {
+    throw new Error("TraceProof OAuth token response did not include access_token.");
+  }
+
+  config._oauthTokenCache = {
+    accessToken,
+    tokenType,
+    expiresAtMs: now + (Number.isFinite(expiresIn) && expiresIn > 0 ? expiresIn * 1000 : 900_000),
+    scope: String(data?.scope ?? "").trim(),
+  };
+
+  return accessToken;
+}
+
+async function traceProofFetch(config, relativePath, options = {}) {
+  const accessToken = await getOAuthAccessToken(config);
+  const headers = {
+    Accept: "application/json",
+    ...(options.headers || {}),
+    Authorization: `Bearer ${accessToken}`,
+  };
+
+  return fetch(`${config.apiBaseUrl}${relativePath}`, {
+    ...options,
+    headers,
+  });
 }
 
 async function resolveStatePath(api) {
@@ -100,7 +198,7 @@ async function createTrace(config, event) {
     sourceSystem,
   };
 
-  const res = await fetch(`${config.apiBaseUrl}/v1/traces`, {
+  const res = await traceProofFetch(config, "/v1/traces", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -115,9 +213,7 @@ async function createTrace(config, event) {
   const traceId = String(data.traceId ?? "").trim();
   const publicReference = String(data.publicReference ?? "").trim();
   const verifyUrl = String(data.verifyUrl ?? "").trim();
-  const qrCodeUrl =
-    String(data.qrCodeUrl ?? "").trim() ||
-    `${config.apiBaseUrl}/v1/traces/${encodeURIComponent(publicReference)}/qr?format=${config.qrFormat}`;
+  const qrCodeUrl = String(data.qrCodeUrl ?? "").trim() || null;
 
   if (!traceId || !publicReference || !verifyUrl) {
     throw new Error("TraceProof create trace response was missing traceId, publicReference, or verifyUrl.");
@@ -128,6 +224,7 @@ async function createTrace(config, event) {
     publicReference,
     verifyUrl,
     qrCodeUrl,
+    qrFormat: config.qrFormat,
     channelId,
     channel,
     sourceSystem,
@@ -179,7 +276,7 @@ async function issueMessageProof(config, traceId, direction, messageSeq, message
     messageDigest,
   };
 
-  const res = await fetch(`${config.apiBaseUrl}/v1/traces/${encodeURIComponent(traceId)}/message-proofs`, {
+  const res = await traceProofFetch(config, `/v1/traces/${encodeURIComponent(traceId)}/message-proofs`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -207,7 +304,7 @@ async function verifyMessageProof(config, traceId, direction, messageSeq, messag
     proof,
   };
 
-  const res = await fetch(`${config.apiBaseUrl}/v1/traces/${encodeURIComponent(traceId)}/message-proofs/verify`, {
+  const res = await traceProofFetch(config, `/v1/traces/${encodeURIComponent(traceId)}/message-proofs/verify`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),

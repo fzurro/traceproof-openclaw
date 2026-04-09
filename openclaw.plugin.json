@@ -2,7 +2,7 @@
   "id": "traceproof-runtime",
   "name": "TraceProof Runtime",
   "description": "Creates one TraceProof conversation trace per OpenClaw session, injects TraceProof grounding automatically, and issues verified inbound/outbound message proofs.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
@@ -11,6 +11,38 @@
         "type": "string",
         "description": "Base URL for the TraceProof API.",
         "default": "https://api.traceproof.org"
+      },
+      "oauthTokenUrl": {
+        "type": "string",
+        "description": "OAuth2 token endpoint for TraceProof client credentials flow.",
+        "default": "https://auth.traceproof.org/oauth/token"
+      },
+      "oauthClientId": {
+        "type": "string",
+        "description": "TraceProof OAuth2 client id."
+      },
+      "oauthClientSecret": {
+        "type": "string",
+        "description": "TraceProof OAuth2 client secret."
+      },
+      "oauthScope": {
+        "type": "string",
+        "description": "OAuth2 scope sent when requesting a TraceProof access token.",
+        "default": "trace:create trace:qr proof:issue proof:verify"
+      },
+      "oauthResource": {
+        "type": "string",
+        "description": "OAuth2 resource / audience for TraceProof API access.",
+        "default": "https://api.traceproof.org"
+      },
+      "oauthClientAuthMethod": {
+        "type": "string",
+        "description": "OAuth2 client authentication method at the token endpoint.",
+        "enum": [
+          "client_secret_post",
+          "client_secret_basic"
+        ],
+        "default": "client_secret_post"
       },
       "agentId": {
         "type": "string",
@@ -56,6 +88,8 @@
       }
     },
     "required": [
+      "oauthClientId",
+      "oauthClientSecret",
       "agentId",
       "credentialKey"
     ]
